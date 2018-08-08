@@ -9,7 +9,7 @@ class ACO:
         self.paths = []
         self.pheromones = []
 
-    def solve(self, alpha=1, beta=1, rho=0.1, n_ants=20, n_iterations=10):
+    def solve(self, alpha=1, beta=1, rho=0.1, n_ants=20, n_iterations=10, verbose=False):
         d = self.init_solution(alpha, beta)
         min_distance = np.inf
         self.ants = []
@@ -17,6 +17,8 @@ class ACO:
         for i in range(n_ants):
             self.ants.append(Ant(self.graph))
         for iteration in range(n_iterations):
+            if verbose and iteration % 100 == 0:
+                print('Iteration {}/{}'.format(iteration, n_iterations))
             np.random.shuffle(starts)
             for i, ant in enumerate(self.ants):
                 ant.initialize(starts[i % len(starts)])
@@ -31,8 +33,9 @@ class ACO:
                     best_ant = ant
             if best_ant is not None:
                 self.paths.append(best_ant.path)
-
-            self.pheromones.append(self.graph.retrieve_pheromone())
+                self.pheromones.append(self.graph.retrieve_pheromone())
+                if verbose:
+                    print('New best solution with d = {} !'.format(min_distance))
 
         return self.paths
 
