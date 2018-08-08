@@ -81,6 +81,9 @@ class Ant:
             self.distance += self.graph.nodes_to_edge(self.position,
                                                       number).distance
             self.position = number
+        self.path.append(self.path[0])
+        self.distance += self.graph.nodes_to_edge(self.position,
+                                                  self.path[0]).distance
 
     def local_update_pheromone(self, d):
         for edge in self.edges_visited:

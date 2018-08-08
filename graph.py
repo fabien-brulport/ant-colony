@@ -106,14 +106,12 @@ class Graph:
                 node = self.nodes[number]
                 tempx.append(node.x)
                 tempy.append(node.y)
-            tempx.append(tempx[0])
-            tempy.append(tempy[0])
             x.append(tempx)
             y.append(tempy)
         lobj, = ax.plot(x[0], y[0], color='r', lw=2)
         lines.append(lobj)
 
-        time_text = plt.text(.9, .9, '', fontsize=10,
+        time_text = plt.text(0, 0, '', fontsize=10,
                              bbox=dict(facecolor='white', edgecolor='black', boxstyle='round'))
         lines.append(time_text)
 
