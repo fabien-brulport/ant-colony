@@ -12,11 +12,12 @@ class ACO:
 
     def solve(self, alpha=1, beta=1, rho=0.1, n_ants=20, n_iterations=10, verbose=False):
         d = self.init_solution(alpha, beta)
+        d_mean = d / (len(self.graph.nodes))
         min_distance = np.inf
         self.ants = []
         starts = list(range(len(self.graph.nodes)))
         for i in range(n_ants):
-            self.ants.append(Ant(self.graph))
+            self.ants.append(Ant(self.graph, d_mean))
         for iteration in range(n_iterations):
             if verbose and iteration % 100 == 0:
                 print('Iteration {}/{}'.format(iteration, n_iterations))
@@ -34,10 +35,12 @@ class ACO:
                     best_ant = ant
             if best_ant is not None:
                 self.paths.append(best_ant.path)
-                self.pheromones.append(self.graph.retrieve_pheromone())
-                self.distances.append(min_distance)
                 if verbose:
                     print('New best solution with d = {} !'.format(min_distance))
+            else:
+                self.paths.append(self.paths[-1])
+            self.pheromones.append(self.graph.retrieve_pheromone())
+            self.distances.append(min_distance)
 
         return self.paths, self.distances
 
@@ -49,13 +52,14 @@ class ACO:
 
 
 class Ant:
-    def __init__(self, graph):
+    def __init__(self, graph, d_mean=1.):
         self.position = None
         self.nodes_to_visit = []
         self.graph = graph
         self.distance = 0
         self.edges_visited = []
         self.path = []
+        self.d_mean = d_mean
 
     def initialize(self, start):
         self.position = start
@@ -69,7 +73,7 @@ class Ant:
     def one_iteration(self, alpha, beta):
         while self.nodes_to_visit:
             number = self.graph.select_node(self.position, self.nodes_to_visit,
-                                            alpha, beta)
+                                            alpha, beta, self.d_mean)
             self.nodes_to_visit.remove(number)
             self.path.append(number)
             self.edges_visited.append(
