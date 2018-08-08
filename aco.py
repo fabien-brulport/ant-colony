@@ -8,6 +8,7 @@ class ACO:
         self.ants = []
         self.paths = []
         self.pheromones = []
+        self.distances = []
 
     def solve(self, alpha=1, beta=1, rho=0.1, n_ants=20, n_iterations=10, verbose=False):
         d = self.init_solution(alpha, beta)
@@ -34,10 +35,11 @@ class ACO:
             if best_ant is not None:
                 self.paths.append(best_ant.path)
                 self.pheromones.append(self.graph.retrieve_pheromone())
+                self.distances.append(min_distance)
                 if verbose:
                     print('New best solution with d = {} !'.format(min_distance))
 
-        return self.paths
+        return self.paths, self.distances
 
     def init_solution(self, alpha, beta):
         ant = Ant(self.graph)
@@ -74,6 +76,7 @@ class Ant:
                 self.graph.nodes_to_edge(self.position, number))
             self.distance += self.graph.nodes_to_edge(self.position,
                                                       number).distance
+            self.position = number
 
     def local_update_pheromone(self, d):
         for edge in self.edges_visited:
