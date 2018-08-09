@@ -85,47 +85,46 @@ class Graph:
         return pheromones
 
     def plot_paths(self, paths, pheromones, distances):
-        fig, ax = plt.subplots()
+        fig, axs = plt.subplots(1, 2)
 
-        lines = []
+        # Edges
+        ax = axs[0]
+        edges = []
         for k, value in pheromones[0].items():
             node1 = self._nodes_to_edge[k].node1
             node2 = self._nodes_to_edge[k].node2
             x = [node1.x, node2.x]
             y = [node1.y, node2.y]
             color = (max(0, 0.9 - value))
-            lobj, = ax.plot(x, y, lw=4, color=str(color))
-            lines.append(lobj)
+            line, = ax.plot(x, y, lw=4, color=str(color))
+            edges.append(line)
 
-        x = []
-        y = []
-        for path in paths:
-            tempx = []
-            tempy = []
-            for number in path:
-                node = self.nodes[number]
-                tempx.append(node.x)
-                tempy.append(node.y)
-            x.append(tempx)
-            y.append(tempy)
-        lobj, = ax.plot(x[0], y[0], color='r', lw=2)
-        lines.append(lobj)
+        # Best paths
+        x_best = [[self.nodes[number].x for number in path] for path in paths]
+        y_best = [[self.nodes[number].y for number in path] for path in paths]
+        best_path, = ax.plot(x_best[0], y_best[0], color='r', lw=2)
 
-        time_text = plt.text(0, 0, '', fontsize=10,
-                             bbox=dict(facecolor='white', edgecolor='black', boxstyle='round'))
-        lines.append(time_text)
+        # Convergence
+        ax = axs[1]
+        ax.plot(distances)
+        frac_x = 0.05 * len(distances)
+        frac_y = 0.05 * (max(distances) - min(distances))
+        point = ax.scatter(0, distances[0], marker='o')
+        text = ax.annotate('', xy=(0 + frac_x, distances[0] + frac_y),
+                           bbox=dict(facecolor='white', edgecolor='black', boxstyle='round'))
 
         def animate(i):
             for j, value in enumerate(pheromones[i].values()):
-                color = (max(0, 0.9 - value))
-                lines[j].set_color(str(color))
-                lines[j].set_linewidth(value)
+                color = (max(0, 1 - value))
+                edges[j].set_color(str(color))
+                edges[j].set_linewidth(value)
 
-            lines[-2].set_data(x[i], y[i])
+            best_path.set_data(x_best[i], y_best[i])
+            point.set_offsets([i, distances[i]])
+            text.set_text("d = {:.5}".format(distances[i]))
+            text.set_position([i + frac_x, distances[i] + frac_y])
 
-            lines[-1].set_text("d = {:.5}".format(distances[i]))
+            return edges, best_path, point, text,
 
-            return lines
-
-        anim = animation.FuncAnimation(fig, animate, frames=len(paths), interval=100, blit=False)
+        _ = animation.FuncAnimation(fig, animate, frames=len(paths), interval=100, blit=False)
         plt.show()
