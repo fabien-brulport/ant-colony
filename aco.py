@@ -36,7 +36,7 @@ class ACO:
             if best_ant is not None:
                 self.paths.append(best_ant.path)
                 if verbose:
-                    print('New best solution with d = {} !'.format(min_distance))
+                    print('New best solution with d = {:.2f} !'.format(min_distance))
             else:
                 self.paths.append(self.paths[-1])
             self.pheromones.append(self.graph.retrieve_pheromone())

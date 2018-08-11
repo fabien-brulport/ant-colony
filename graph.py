@@ -84,8 +84,11 @@ class Graph:
 
         return pheromones
 
-    def plot_paths(self, paths, pheromones, distances):
-        fig, axs = plt.subplots(1, 2)
+    def plot_paths(self, paths, pheromones, distances, fig=None):
+        if fig is None:
+            fig, axs = plt.subplots(1, 2)
+        else:
+            axs = fig.get_axes()
 
         # Edges
         ax = axs[0]
@@ -121,10 +124,10 @@ class Graph:
 
             best_path.set_data(x_best[i], y_best[i])
             point.set_offsets([i, distances[i]])
-            text.set_text("d = {:.5}".format(distances[i]))
+            text.set_text("d = {:.3f}".format(distances[i]))
             text.set_position([i + frac_x, distances[i] + frac_y])
 
             return edges, best_path, point, text,
 
-        _ = animation.FuncAnimation(fig, animate, frames=len(paths), interval=100, blit=False)
-        plt.show()
+        anim = animation.FuncAnimation(fig, animate, frames=len(paths), interval=100, blit=False)
+        return anim
