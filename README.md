@@ -34,11 +34,19 @@ The important parameters are:
 * a parameter *alpha* controlling the importance of the pheromones during the selection of the next node
 * a parameter *beta* controlling the importance of the distance of the arc during this same selection
 
-Have a look at the notebook to see some example and play with the parameters !
+Have a look at the examples to see how it works !
 
-Here is an animation showing the evolution of the pheromone on each arc (black lines) and
-the current best path (in red).
+## Example: solving the TSP across European cities
+
+The nodes of the graph we want to solve:
+<p align="center">
+    <img src="gallery/cities.png" width = "500">
+</p>
+
+Here is an animation showing the evolution of the pheromone on each arc (black lines), the current best path (in red) and the distance convergence.
 
 <p align="center">
-    <img src="gallery/paths.gif" width = "400">
+    <img src="gallery/paths.gif" width = "1000">
 </p>
+
+With 100 iterations, the solution doesn't look optimal but it's reasonable.
