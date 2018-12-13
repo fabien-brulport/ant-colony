@@ -13,16 +13,16 @@ known as a NP-hard problem. As emphasized, it does not solve the problem by find
 algorithm) but provides an acceptable solution in an 
 acceptable time (the user fixes the number of iteration) for a large dimensions problem.
 
-Here is a short description of the algorithm (multiple version exists):
+Here is a short description of the algorithm (multiple versions exist):
 1. The graph is initialized by leaving the same value of pheromone on every arcs (every node of
 the problem is linked to all the remaining nodes), and the ants are randomly assigned to one of
 the node.
 2. At each iteration, every ant finds a solution to the problem, by going through every nodes and
 comes back to its initial node.
-3. To select in which city the ant should go, a probability is linked to each arc, representing
-its the attractiveness (combination of its pheromone value and its distance).
+3. To select in which city the ant should go, a probability is assigned to each arc, representing
+its attractiveness (combination of its pheromone value and its distance).
 The arc is then selected by drawing a sample from this probability law.
-4. At the end of the iteration, the pheromone on every arc is update:
+4. At the end of the iteration, the pheromone on every arc is updated:
     * some pheromone is removed since it evaporates
     * some pheromone is added, depending on the total distance travelled by every ant: the smaller
     the distance, the larger the added pheromone on its path.
@@ -36,10 +36,9 @@ The important parameters are:
 
 Have a look at the notebook to see some example and play with the parameters !
 
-Here is an animation showing the evolution of the pheromone on each arc (black lines),
-the actual best path (in red) and the convergence of the minimum distance with respect
-to the iterations.
+Here is an animation showing the evolution of the pheromone on each arc (black lines) and
+the current best path (in red).
 
 <p align="center">
-    <img src="gallery/paths.gif" width = "200">
+    <img src="gallery/paths.gif" width = "400">
 </p>
