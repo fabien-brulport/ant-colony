@@ -10,7 +10,7 @@ class ACO:
         self.pheromones = []
         self.distances = []
 
-    def solve(self, alpha=1, beta=1, rho=0.1, n_ants=20, n_iterations=10, verbose=False):
+    def solve(self, alpha=1, beta=1, rho=0.1, n_ants=20, n_iterations=10, verbose=False, plotter=None):
         d = self.init_solution(alpha, beta)
         d_mean = d / (len(self.graph.nodes))
         min_distance = np.inf
@@ -41,6 +41,8 @@ class ACO:
                 self.paths.append(self.paths[-1])
             self.pheromones.append(self.graph.retrieve_pheromone())
             self.distances.append(min_distance)
+            if plotter is not None:
+                plotter.update(self.pheromones[-1], self.paths[-1], min_distance)
 
         return self.paths, self.distances
 
