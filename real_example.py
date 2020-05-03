@@ -13,6 +13,11 @@ def main():
     alpha = st.sidebar.slider("alpha (pheromone weight)", 0., 10., 1.)
     beta = st.sidebar.slider("beta (heuristic weight)", 0., 10., 1.)
     rho = st.sidebar.slider("rho (evaporation rate)", 0., 1., 0.5)
+    set_seed = st.sidebar.checkbox("Set seed", value=True)
+    if set_seed:
+        seed = st.sidebar.slider("Seed", 0, 10, 0)
+    else:
+        seed = None
 
     df = pd.read_csv("data/european_cities.csv")
     cities = df["name"]
@@ -22,7 +27,7 @@ def main():
     # Create the graph
     nodes = []
     for i, name in enumerate(cities):
-        nodes.append(Node(longitudes[i], latitudes[i], index=i, name=name))
+        nodes.append(Node(longitudes[i], latitudes[i], name=name))
 
     def distance_function_lat_lng(node1, node2):
         earth_radius = 6373.0
@@ -37,13 +42,13 @@ def main():
         c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
         return earth_radius * c
 
-    graph = Graph(nodes, distance_function=distance_function_lat_lng)
+    graph = Graph(nodes, distance_function=distance_function_lat_lng, seed=seed)
     st.title("European cities")
     plotter = MapPlotter(graph, zoom=2.8)
     plotter.init_plot()
 
     # Solve the TSP
-    aco = ACO(graph)
+    aco = ACO(graph, seed=seed)
     path, distance = aco.solve(
         alpha=alpha,
         beta=beta,

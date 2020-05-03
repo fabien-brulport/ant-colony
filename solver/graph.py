@@ -2,11 +2,21 @@ import numpy as np
 
 
 class Node:
-    def __init__(self, x, y, index, name=None):
+    INDEX = -1
+
+    def __new__(cls, *args, **kwargs):
+        """Automatically increments the index number at each instance created."""
+        cls.INDEX += 1
+        return super().__new__(cls)
+
+    def __init__(self, x, y, name=None):
         self.x = x
         self.y = y
-        self.index = index
         self.name = name
+        self.index = Node.INDEX
+
+    def __eq__(self, other):
+        return self.index == other.index
 
 
 def euclidean_distance(node1, node2):
@@ -25,28 +35,29 @@ class Edge:
 
 
 class Graph:
-    def __init__(self, nodes, distance_function=euclidean_distance):
+    def __init__(self, nodes, distance_function=euclidean_distance, seed=None):
         self.nodes = {node.index: node for node in nodes}
         self.edges = {}
+        self.rng = np.random.default_rng(seed=seed)
 
-        for i in range(len(self.nodes)):
-            for j in range(i + 1, len(self.nodes)):
-                self.edges[(i, j)] = Edge(self.nodes[i], self.nodes[j], distance_function)
+        # Sorted list of the nodes index
+        nodes_index = sorted(self.nodes)
+
+        for i, index_node_1 in enumerate(nodes_index):
+            for index_node_2 in nodes_index[i + 1:]:
+                self.edges[(index_node_1, index_node_2)] = Edge(self.nodes[index_node_1], self.nodes[index_node_2], distance_function)
 
     def nodes_to_edge(self, node1, node2):
-        return self.edges[min(node1, node2), max(node1, node2)]
+        return self.edges[min(node1.index, node2.index), max(node1.index, node2.index)]
 
-    def select_node(self, start, nodes, alpha, beta, d_mean):
+    def select_node(self, current_node, nodes, alpha, beta, d_mean):
         if len(nodes) == 1:
             return nodes[0]
-        else:
-            mapping = dict(zip(range(len(nodes)), nodes))
-            probabilities = np.zeros(len(nodes))
-            for i, number in enumerate(nodes):
-                probabilities[i] = self.nodes_to_edge(start, number).value(alpha, beta, d_mean)
-            probabilities = probabilities / np.sum(probabilities)
-            number = mapping[np.random.choice(len(probabilities), p=probabilities)]
-            return number
+
+        probabilities = np.array([self.nodes_to_edge(current_node, node).value(alpha, beta, d_mean) for node in nodes])
+        probabilities = probabilities / np.sum(probabilities)
+        chosen_node = self.rng.choice(nodes, p=probabilities)
+        return chosen_node
 
     def global_update_pheromone(self, rho):
         for edge in self.edges.values():

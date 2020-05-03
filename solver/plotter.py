@@ -80,13 +80,13 @@ class MapPlotter:
     def update(self, best_path, distance):
         lines_pheromones = self._get_lines_pheromones()
         lines_best_path = []
-        start = [self.graph.nodes[best_path[0]].x, self.graph.nodes[best_path[0]].y]
-        for node_index in best_path:
+        start = [best_path[0].x, best_path[0].y]
+        for node in best_path:
             lines_best_path.append({
                 "start": start,
-                "end": [self.graph.nodes[node_index].x, self.graph.nodes[node_index].y]
+                "end": [node.x, node.y]
             })
-            start = [self.graph.nodes[node_index].x, self.graph.nodes[node_index].y]
+            start = [node.x, node.y]
 
         self.layer_pheromones.data = lines_pheromones
         self.layer_best_path.data = lines_best_path
