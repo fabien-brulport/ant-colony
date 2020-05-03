@@ -1,10 +1,9 @@
-from .graph import Graph
 import numpy as np
 
 
 class ACO:
-    def __init__(self, nodes):
-        self.graph = Graph(nodes)
+    def __init__(self, graph):
+        self.graph = graph
         self.ants = []
         self.paths = []
         self.pheromones = []
@@ -12,6 +11,7 @@ class ACO:
 
     def solve(self, alpha=1, beta=1, rho=0.1, n_ants=20, n_iterations=10, verbose=False, plotter=None):
         d = self.init_solution(alpha, beta)
+        # TODO compute mean
         d_mean = d / (len(self.graph.nodes))
         min_distance = np.inf
         self.ants = []
@@ -65,24 +65,22 @@ class Ant:
 
     def initialize(self, start):
         self.position = start
-        self.nodes_to_visit = [node.number for i, node in
-                               enumerate(self.graph.nodes)
-                               if i != self.position]
+        self.nodes_to_visit = [node.index for i, node in self.graph.nodes.items() if i != self.position]
         self.distance = 0
         self.edges_visited = []
         self.path = [start]
 
     def one_iteration(self, alpha, beta):
         while self.nodes_to_visit:
-            number = self.graph.select_node(self.position, self.nodes_to_visit,
-                                            alpha, beta, self.d_mean)
-            self.nodes_to_visit.remove(number)
-            self.path.append(number)
+            node_index = self.graph.select_node(self.position, self.nodes_to_visit,
+                                                alpha, beta, self.d_mean)
+            self.nodes_to_visit.remove(node_index)
+            self.path.append(node_index)
             self.edges_visited.append(
-                self.graph.nodes_to_edge(self.position, number))
+                self.graph.nodes_to_edge(self.position, node_index))
             self.distance += self.graph.nodes_to_edge(self.position,
-                                                      number).distance
-            self.position = number
+                                                      node_index).distance
+            self.position = node_index
         self.path.append(self.path[0])
         self.distance += self.graph.nodes_to_edge(self.position,
                                                   self.path[0]).distance

@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 
 from solver.graph import Node, Graph
 from solver.aco import ACO
@@ -21,16 +22,28 @@ def main():
     # Create the graph
     nodes = []
     for i in range(len(cities)):
-        nodes.append(Node(longitudes[i], latitudes[i]))
+        nodes.append(Node(longitudes[i], latitudes[i], index=i))
 
-    graph = Graph(nodes)
+    def distance_function_lat_lng(node1, node2):
+        earth_radius = 6373.0
+        # Transform in radians
+        lat1 = np.radians(node1.x)
+        lat2 = np.radians(node2.x)
+        lng1 = np.radians(node1.y)
+        lng2 = np.radians(node2.y)
+        delta_lat = lat2 - lat1
+        delta_lng = lng2 - lng1
+        a = np.sin(delta_lat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(delta_lng / 2) ** 2
+        c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
+        return earth_radius * c
+
+    graph = Graph(nodes, distance_function=distance_function_lat_lng)
     st.title("European cities")
-    plotter = MapPlotter(graph)
-    # plotter.plot_graph()
+    plotter = MapPlotter(graph, zoom=2.8)
     plotter.init_plot()
 
-    # Solve for 100 iterations
-    aco = ACO(nodes)
+    # Solve the TSP
+    aco = ACO(graph)
     paths, distances = aco.solve(
         alpha=alpha,
         beta=beta,
