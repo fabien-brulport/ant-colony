@@ -21,8 +21,8 @@ def main():
 
     # Create the graph
     nodes = []
-    for i in range(len(cities)):
-        nodes.append(Node(longitudes[i], latitudes[i], index=i))
+    for i, name in enumerate(cities):
+        nodes.append(Node(longitudes[i], latitudes[i], index=i, name=name))
 
     def distance_function_lat_lng(node1, node2):
         earth_radius = 6373.0
@@ -44,7 +44,7 @@ def main():
 
     # Solve the TSP
     aco = ACO(graph)
-    paths, distances = aco.solve(
+    path, distance = aco.solve(
         alpha=alpha,
         beta=beta,
         rho=rho,

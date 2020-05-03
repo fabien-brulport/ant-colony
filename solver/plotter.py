@@ -15,47 +15,45 @@ class MapPlotter:
         self.df_distance = None
         self.distance_chart = None
 
-    def plot_graph(self):
-        data = []
-        for edge in self.graph._nodes_to_edge.values():
-            node1 = edge.node1
-            node2 = edge.node2
-            data.append({
-                "start": [node1.x, node1.y],
-                "end": [node2.x, node2.y],
-            })
-
-        layer = pydeck.Layer(
-            "LineLayer",
-            data,
-            get_source_position="start",
-            get_target_position="end",
-            coverage=1,
-            pickable=True,
-        )
-        initial_view_state = self._get_init_view(data)
-        r = pydeck.Deck(layers=[layer], initial_view_state=initial_view_state, map_style="", tooltip=True, mapbox_key="")
-        st.pydeck_chart(r)
-
     def init_plot(self):
 
-        # Layer which shows the value of pheromones
-        lines = []
-        for edge in self.graph._nodes_to_edge.values():
-            node1 = edge.node1
-            node2 = edge.node2
-            lines.append({
-                "start": [node1.x, node1.y],
-                "end": [node2.x, node2.y],
-                "value": 1,
+        # Layer which shows the nodes name (if they exist)
+        nodes_name = []
+        for node in self.graph.nodes.values():
+            nodes_name.append({
+                "coordinates": [node.x, node.y],
+                "name": node.name,
             })
+        layer_nodes = pydeck.Layer(
+            "ScatterplotLayer",
+            nodes_name,
+            coverage=1,
+            pickable=True,
+            get_position="coordinates",
+            radius_min_pixels=4,
+            get_color=[0, 166, 251],
+        )
+        layer_text = pydeck.Layer(
+            "TextLayer",
+            nodes_name,
+            pickable=True,
+            get_position="coordinates",
+            get_text="name",
+            get_color=[0, 166, 251, 100],
+            get_size=20,
+            get_text_anchor="'start'",
+            get_alignment_baseline="'bottom'",
+        )
 
+        # Layer which shows the value of pheromones
+        lines_pheromones = self._get_lines_pheromones()
         self.layer_pheromones = pydeck.Layer(
             "LineLayer",
-            lines,
+            lines_pheromones,
             get_source_position="start",
             get_target_position="end",
             get_width="value",
+            width_scale=4,
             coverage=1,
             pickable=True,
         )
@@ -70,8 +68,8 @@ class MapPlotter:
             coverage=1,
             pickable=True,
         )
-        initial_view_state = self._get_init_view(lines)
-        self.r = pydeck.Deck(layers=[self.layer_pheromones, self.layer_best_path], initial_view_state=initial_view_state, map_style="", tooltip=True, mapbox_key="")
+        initial_view_state = self._get_init_view(lines_pheromones)
+        self.r = pydeck.Deck(layers=[layer_nodes, layer_text, self.layer_pheromones, self.layer_best_path], initial_view_state=initial_view_state, map_style="", tooltip=True, mapbox_key="")
         self.chart = st.pydeck_chart(self.r)
 
         # Empty plot to show the distance convergence
@@ -79,27 +77,19 @@ class MapPlotter:
         self.distance_chart = st.line_chart(self.df_distance)
         self.text = st.empty()
 
-    def update(self, pheromones, best_path, distance):
-        data = []
-        for k, value in pheromones.items():
-            node1 = self.graph._nodes_to_edge[k].node1
-            node2 = self.graph._nodes_to_edge[k].node2
-            data.append({
-                "start": [node1.x, node1.y],
-                "end": [node2.x, node2.y],
-                "value": value,
-            })
-        best = []
+    def update(self, best_path, distance):
+        lines_pheromones = self._get_lines_pheromones()
+        lines_best_path = []
         start = [self.graph.nodes[best_path[0]].x, self.graph.nodes[best_path[0]].y]
         for node_index in best_path:
-            best.append({
+            lines_best_path.append({
                 "start": start,
                 "end": [self.graph.nodes[node_index].x, self.graph.nodes[node_index].y]
             })
             start = [self.graph.nodes[node_index].x, self.graph.nodes[node_index].y]
 
-        self.layer_pheromones.data = data
-        self.layer_best_path.data = best
+        self.layer_pheromones.data = lines_pheromones
+        self.layer_best_path.data = lines_best_path
         self.r.update()
         self.chart.pydeck_chart(self.r)
         self.distance_chart.add_rows({"distance": [distance]})
@@ -111,3 +101,15 @@ class MapPlotter:
         center_lat = (max(lat) - min(lat)) / 2 + min(lat)
         center_lng = (max(lng) - min(lng)) / 2 + min(lng)
         return pydeck.ViewState(latitude=center_lat, longitude=center_lng, zoom=self.zoom, max_zoom=10, pitch=0, bearing=0)
+
+    def _get_lines_pheromones(self):
+        lines_pheromones = []
+        for (node_index_1, node_index_2), value in self.graph.retrieve_pheromone().items():
+            node1 = self.graph.nodes[node_index_1]
+            node2 = self.graph.nodes[node_index_2]
+            lines_pheromones.append({
+                "start": [node1.x, node1.y],
+                "end": [node2.x, node2.y],
+                "value": value,
+            })
+        return lines_pheromones

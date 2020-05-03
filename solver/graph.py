@@ -2,10 +2,11 @@ import numpy as np
 
 
 class Node:
-    def __init__(self, x, y, index):
+    def __init__(self, x, y, index, name=None):
         self.x = x
         self.y = y
         self.index = index
+        self.name = name
 
 
 def euclidean_distance(node1, node2):
@@ -26,14 +27,14 @@ class Edge:
 class Graph:
     def __init__(self, nodes, distance_function=euclidean_distance):
         self.nodes = {node.index: node for node in nodes}
-        self._nodes_to_edge = {}
+        self.edges = {}
 
         for i in range(len(self.nodes)):
             for j in range(i + 1, len(self.nodes)):
-                self._nodes_to_edge[(i, j)] = Edge(self.nodes[i], self.nodes[j], distance_function)
+                self.edges[(i, j)] = Edge(self.nodes[i], self.nodes[j], distance_function)
 
     def nodes_to_edge(self, node1, node2):
-        return self._nodes_to_edge[min(node1, node2), max(node1, node2)]
+        return self.edges[min(node1, node2), max(node1, node2)]
 
     def select_node(self, start, nodes, alpha, beta, d_mean):
         if len(nodes) == 1:
@@ -48,12 +49,12 @@ class Graph:
             return number
 
     def global_update_pheromone(self, rho):
-        for edge in self._nodes_to_edge.values():
+        for edge in self.edges.values():
             edge.pheromone = (1 - rho) * edge.pheromone
 
     def retrieve_pheromone(self):
         pheromones = dict()
-        for k, edge in self._nodes_to_edge.items():
+        for k, edge in self.edges.items():
             pheromones[k] = edge.pheromone
 
         return pheromones

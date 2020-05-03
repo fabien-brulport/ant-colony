@@ -23,19 +23,10 @@ def main():
         nodes.append(Node(coordinates[i, 0], coordinates[i, 1]))
 
     graph = Graph(nodes)
-    plotter = MapPlotter(graph)
-    fig, ax = plotter.plot_graph()
-    st.pyplot(fig)
 
     # Solve for 100 iterations
     aco = ACO(nodes)
     paths, distances = aco.solve(rho=0.5, n_iterations=100, verbose=True)
-
-    # Plot results
-    # plotter.plot(paths, aco.pheromones, distances)
-    # anim, fig = plotter.plot_paths(paths, aco.pheromones, distances)
-    # st.pyplot(fig)
-    plotter.plot_test(paths, aco.pheromones)
 
 
 if __name__ == '__main__':
