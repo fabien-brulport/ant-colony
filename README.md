@@ -34,19 +34,23 @@ The important parameters are:
 * a parameter *alpha* controlling the importance of the pheromones during the selection of the next node
 * a parameter *beta* controlling the importance of the distance of the arc during this same selection
 
-Have a look at the examples to see how it works !
-
 ## Example: solving the TSP across European cities
 
-The nodes of the graph we want to solve:
-<p align="center">
-    <img src="gallery/cities.png" width = "500">
-</p>
+I'm using [Streamlit](https://www.streamlit.io/) to build a nice visualisation, in which you can easily teak the parameters and check their impact on the solution.
+
+The requirements (only `streamlit` for now) can be installed with
+```bash
+pip install -r requirements.txt
+
+```
+Then, the app can be accessed by running
+
+```bash
+streamlit run main.py
+```
 
 Here is an animation showing the evolution of the pheromone on each arc (black lines), the current best path (in red) and the distance convergence.
 
-<p align="center">
-    <img src="gallery/paths.gif" width = "1000">
-</p>
+![Demo Animation](../assets/animation.gif?raw=true)
 
 With 100 iterations, the solution doesn't look optimal but it's reasonable.

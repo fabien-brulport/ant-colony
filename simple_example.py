@@ -1,10 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import streamlit as st
 
 from solver.graph import Node, Graph
 from solver.aco import ACO
-from solver.plotter import MapPlotter
 
 
 def main():
