@@ -1,3 +1,5 @@
+import time
+
 import streamlit as st
 import pydeck
 import pandas as pd
@@ -33,17 +35,6 @@ class MapPlotter:
             radius_min_pixels=4,
             get_color=[0, 166, 251],
         )
-        layer_text = pydeck.Layer(
-            "TextLayer",
-            nodes_name,
-            pickable=True,
-            get_position="coordinates",
-            get_text="name",
-            get_color=[0, 166, 251, 100],
-            get_size=20,
-            get_text_anchor="'start'",
-            get_alignment_baseline="'bottom'",
-        )
 
         # Layer which shows the value of pheromones
         lines_pheromones = self._get_lines_pheromones()
@@ -66,14 +57,15 @@ class MapPlotter:
             get_target_position="end",
             get_color=[255, 0, 0],
             coverage=1,
+            width_scale=3,
             pickable=True,
         )
         initial_view_state = self._get_init_view(lines_pheromones)
-        self.r = pydeck.Deck(layers=[layer_nodes, layer_text, self.layer_pheromones, self.layer_best_path], initial_view_state=initial_view_state, map_style="", tooltip=True, mapbox_key="")
+        self.r = pydeck.Deck(layers=[layer_nodes, self.layer_pheromones, self.layer_best_path], initial_view_state=initial_view_state, map_style="", tooltip=True, mapbox_key="")
         self.chart = st.pydeck_chart(self.r)
 
         # Empty plot to show the distance convergence
-        self.df_distance = pd.DataFrame({"distance": []})
+        self.df_distance = pd.DataFrame({"Best distance": []})
         self.distance_chart = st.line_chart(self.df_distance)
         self.text = st.empty()
 
@@ -92,8 +84,9 @@ class MapPlotter:
         self.layer_best_path.data = lines_best_path
         self.r.update()
         self.chart.pydeck_chart(self.r)
-        self.distance_chart.add_rows({"distance": [distance]})
+        self.distance_chart.add_rows({"Best distance": [distance]})
         self.text.text(f"Best distance = {distance:.2f}")
+        time.sleep(0.01)
 
     def _get_init_view(self, lines):
         lat = [line["start"][1] for line in lines]
